@@ -1,38 +1,17 @@
-'use client';
+// app/pagamentos/page.tsx (componente de servidor)
 
-import useMercadoPago from "@/app/hooks/useMercadoPago";
-import { useStripe } from '@/app/hooks/useStripe';
+import PaymentClient from '@/app/components/PaymentClient';
+import { auth } from '@/app/lib/auth';
+import { redirect } from 'next/navigation';
 
-export default function Pagamentos() {
-  const {
-    createPaymentStripeCheckout,
-    createSubscriptionStripeCheckout,
-    handleCreateStripePortal,
-  } = useStripe();
+export default async function PagamentosPage() {
+  const session = await auth();
 
-  const { createMercadoPagoCheckout } = useMercadoPago();
+  // Se não houver usuário logado, redireciona para a tela de login
+  if (!session?.user) {
+    redirect('/login');
+  }
 
-  return (
-    <div className="flex flex-col gap-10 items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold">Pagamentos</h1>
-      <button className="border rounded-md px-1" onClick={() => createPaymentStripeCheckout({ testeId: '123' })}>
-        Criar Pagamento Stripe
-      </button>
-      <button
-        className="border rounded-md px-1"
-        onClick={() => createSubscriptionStripeCheckout({ testeId: '123' })}
-      >
-        Criar Assinatura Stripe
-      </button>
-      <button className="border rounded-md px-1" onClick={handleCreateStripePortal}>
-        Criar Portal de Pagamento
-      </button>
-      <button className="border rounded-md px-1" onClick={() => createMercadoPagoCheckout({
-        testeId: '123',
-        userEmail: 'teste@gmail.com'
-      })}>
-        Criar Pagamento Mercado Pago
-      </button>
-    </div>
-  );
+  // Renderiza o componente client-side que contém as funcionalidades de pagamento
+  return <PaymentClient />;
 }
