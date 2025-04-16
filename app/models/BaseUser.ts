@@ -4,6 +4,7 @@ export interface BaseUserData {
     name?: string;
     email: string;
     image?: string;
+    role?: string; // Propriedade role incluída na base
     createdAt?: Date;
     updatedAt?: Date;
   }
@@ -11,7 +12,7 @@ export interface BaseUserData {
   export abstract class BaseUser {
     protected data: BaseUserData;
   
-    constructor(data: BaseUserData) { // Adicione o parâmetro data aqui
+    constructor(data: BaseUserData) {
       this.data = data;
     }
   

@@ -1,26 +1,32 @@
-import { Customer } from 'mercadopago';
-import { Admin } from './Admin';
-import { Employee } from './Employee';
-
 // app/models/index.ts
-export * from './BaseUser';
-export * from './Admin';
-export * from './Employee';
-export * from './Customer';
+import { BaseUser, type BaseUserData } from './BaseUser';
+import { Admin, type AdminData } from './Admin';
+import { Customer, type CustomerData } from './Customer';
+import { Employee, type EmployeeData } from './Employee';
 
+// Re-exporta as classes (valores)
+export { BaseUser, Admin, Customer, Employee };
+
+// Re-exporta os tipos explicitamente com 'export type'
+export type { BaseUserData, AdminData, CustomerData, EmployeeData };
+
+// Define o tipo união para User
 export type User = Admin | Employee | Customer;
 
-// Função factory para criar o tipo correto de usuário com base no role
-export function createUser(data: any): User {
-  switch(data.role) {
-    case 'admin':
-      return new Admin(data);
-    case 'employee':
-      return new Employee(data);
-    case 'customer':
-      return new Customer(data);
-    default:
-      // Padrão para Employee ou outra lógica que faça sentido
-      return new Employee(data);
+// Tipo para os dados de usuário
+export type UserData = AdminData | CustomerData | EmployeeData;
+
+/**
+ * Função factory para criar o tipo correto de usuário com base no role
+ */
+export function createUser(data: UserData): User {
+  // Verifica o role para determinar qual classe instanciar
+  if (data.role === 'admin') {
+    return new Admin(data as AdminData);
+  } else if (data.role === 'customer') {
+    return new Customer(data as CustomerData);
+  } else {
+    // Default para Employee
+    return new Employee(data as EmployeeData);
   }
 }

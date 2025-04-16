@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export function Footer() {
   return (
     <footer className="bg-[#121212] border-t border-[#333] py-8">
