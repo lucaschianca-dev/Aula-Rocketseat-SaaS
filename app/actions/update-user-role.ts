@@ -4,14 +4,9 @@
 import { db } from "@/app/lib/firebase";
 import { revalidatePath } from "next/cache";
 
-type Role = 'admin' | 'employee';
-
-/**
- * Atualiza o papel (role) de um usuário no banco de dados
- */
 export async function updateUserRole(formData: FormData): Promise<void> {
   const userId = formData.get('userId') as string;
-  const newRole = formData.get('newRole') as Role;
+  const newRole = formData.get('newRole') as string;
   
   if (!userId || !newRole) {
     console.error("Dados inválidos para atualização de papel.");

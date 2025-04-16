@@ -12,9 +12,6 @@ interface AdminGuardProps {
  * Um componente wrapper que, no lado do servidor, garante que:
  * - O usuário esteja autenticado (senão redireciona para /login).
  * - O papel do usuário seja 'admin' (senão redireciona para /unauthorized).
- *
- * Por ser um componente server-side (sem "use client"),
- * a verificação acontece antes do conteúdo ser enviado ao navegador.
  */
 export default async function AdminGuard({ children }: AdminGuardProps) {
   // Assegura que o usuário está autenticado

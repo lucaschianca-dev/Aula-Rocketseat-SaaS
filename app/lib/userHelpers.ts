@@ -1,14 +1,7 @@
 // app/lib/userHelpers.ts
-import { db } from "./firebase"; // ajuste o caminho conforme sua estrutura
+import { db } from "./firebase";
+import { Admin, Customer, Employee, BaseUserData } from "../models";
 
-/**
- * Retorna o papel (role) do usuário baseado no email.
- * Se não encontrar o papel no banco, retorna o papel padrão.
- *
- * @param email - E-mail do usuário
- * @param defaultRole - Papel padrão se não encontrado (default: "employee")
- * @returns Papel do usuário
- */
 export async function getUserRole(email: string, defaultRole: string = "employee"): Promise<string> {
   const userDoc = await db
     .collection("users")
@@ -23,20 +16,23 @@ export async function getUserRole(email: string, defaultRole: string = "employee
   return defaultRole;
 }
 
-/**
- * Retorna todos os usuários cadastrados no sistema.
- * Cada objeto do array inclui o ID do documento e os dados do usuário.
- *
- * @returns Array de usuários
- */
-export async function getAllUsers(): Promise<any[]> {
+export async function getAllUsers() {
   const usersSnapshot = await db.collection("users").get();
 
-  // Mapeia cada documento para um objeto contendo seu id e demais dados
-  const users = usersSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  return users;
+  return usersSnapshot.docs.map(doc => {
+    const userData = {
+      id: doc.id,
+      ...doc.data()
+    } as BaseUserData & { role?: string };
+    
+    // Criar a instância apropriada baseada no papel do usuário
+    switch(userData.role) {
+      case 'admin':
+        return new Admin(userData);
+      case 'customer':
+        return new Customer(userData);
+      default:
+        return new Employee(userData);
+    }
+  });
 }
