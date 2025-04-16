@@ -1,112 +1,75 @@
-import { useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
 
 export function useStripe() {
-    const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [stripe, setStripe] = useState<Stripe | null>(null);
 
-    useEffect(() => {
-        async function loadStripeAsync() {
-            const stripeInstance = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-            setStripe(stripeInstance);
-        };
-        loadStripeAsync();
-    }, []);
+  useEffect(() => {
+    async function loadStripeAsync() {
+      const stripeInstance = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUB_KEY!);
+      setStripe(stripeInstance);
+    }
+
+    loadStripeAsync();
+  }, []);
+
+  async function createPaymentStripeCheckout(checkoutData: { testeId: string }) {
+    if (!stripe) return;
+
+    try {
+      const response = await fetch("/api/stripe/create-pay-checkout", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checkoutData),
+      })
+
+      const data = await response.json();
+
+      await stripe.redirectToCheckout({ sessionId: data.sessionId })
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
 
-    /**
-     * Funcao para criar funcao de pagamento unico com Stripe
-     * @param checkoutData Dados necessarios para criar a sessao de checkout
-     */
-    async function createPaymentStripeCheckout(checkoutData: {
-        priceId: string;
-        userId: string;
-    }) {
+  async function createSubscriptionStripeCheckout(checkoutData: { testeId: string }) {
+    if (!stripe) return;
 
-        if (!stripe) {
-            throw new Error("Stripe is not loaded");
-        }
+    try {
+      const response = await fetch("/api/stripe/create-subscription-checkout", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checkoutData),
+      })
 
-        try {
-            const response = await fetch("/api/stripe/create-pay-checkout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(checkoutData),
-            });
+      const data = await response.json();
 
-            const data = await response.json();
+      await stripe.redirectToCheckout({ sessionId: data.id })
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-            await stripe.redirectToCheckout({
-                sessionId: data.sessionId,
-            });
-            
-        } catch (error) {
+  async function handleCreateStripePortal() {
+    const response = await fetch("/api/stripe/create-portal", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
-            console.error(error);
+    const data = await response.json();
 
-        }
+    window.location.href = data.url;
+  }
 
-    } // createPaymentStripeCheckout
-
-    /**
-     * Funcao para criar funcao de pagamento de assinatura com Stripe
-     * @param checkoutData Dados necessarios para criar a sessao de checkout
-     */
-    async function createSubscriptionStripeCheckout(checkoutData: {
-        priceId: string;
-        userId: string;
-    }) {
-
-        if (!stripe) {
-            throw new Error("Stripe is not loaded");
-        }
-        
-        try {
-            const response = await fetch("/api/stripe/create-subscription-checkout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(checkoutData),
-            });
-
-            const data = await response.json();
-
-            await stripe.redirectToCheckout({
-                sessionId: data.sessionId,
-            });
-
-        } catch (error) {
-
-            console.error(error);
-
-        }
-
-    } // createSubscriptionStripeCheckout
-
-    /**
-     * Funcao para criar funcao de portal de assinatura com Stripe
-     */
-    async function handleCreateStripePortal() {
-
-        const response = await fetch("/api/stripe/create-portal", { 
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        const data = await response.json();
-
-        window.location.href = data.url;
-
-    } // handleCreateStripePortal
-
-    return {
-        createPaymentStripeCheckout,
-        createSubscriptionStripeCheckout,
-        handleCreateStripePortal
-    };
-
-} // useStripe
+  return {
+    createPaymentStripeCheckout,
+    createSubscriptionStripeCheckout,
+    handleCreateStripePortal,
+  };
+}
