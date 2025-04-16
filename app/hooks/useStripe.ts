@@ -17,7 +17,10 @@ export function useStripe() {
      * Funcao para criar funcao de pagamento unico com Stripe
      * @param checkoutData Dados necessarios para criar a sessao de checkout
      */
-    async function createPaymentStripeCheckout(checkoutData: any) {
+    async function createPaymentStripeCheckout(checkoutData: {
+        priceId: string;
+        userId: string;
+    }) {
 
         if (!stripe) {
             throw new Error("Stripe is not loaded");
@@ -50,7 +53,10 @@ export function useStripe() {
      * Funcao para criar funcao de pagamento de assinatura com Stripe
      * @param checkoutData Dados necessarios para criar a sessao de checkout
      */
-    async function createSubscriptionStripeCheckout(checkoutData: any) {
+    async function createSubscriptionStripeCheckout(checkoutData: {
+        priceId: string;
+        userId: string;
+    }) {
 
         if (!stripe) {
             throw new Error("Stripe is not loaded");
